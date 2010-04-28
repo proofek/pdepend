@@ -1939,6 +1939,10 @@ class PHP_Depend_Parser implements PHP_Depend_ConstantsI
                 $expressions[] = $this->_parseSilenceOperator();
                 break;
 
+            case self::T_EXCLAMATION_MARK:
+                $expressions[] = $this->_parseNegateOperator();
+                break;
+
             case self::T_NEW:
                 $expressions[] = $this->_parseAllocationExpression();
                 break;
@@ -2056,12 +2060,33 @@ class PHP_Depend_Parser implements PHP_Depend_ConstantsI
             }
         }
 
+        return $this->_reduce($expressions);
+    }
+
+    /**
+     * This method takes an array of parsed expression nodes and reduces them
+     * to a single expression tree.
+     *
+     * @param array(PHP_Depend_Code_ASTExpression) $expressions Array containing
+     *        all parsed expression nodes.
+     *
+     * @return PHP_Depend_Code_ASTExpression
+     * @since 0.9.13
+     */
+    private function _reduce(array $expressions)
+    {
         $count = count($expressions);
         if ($count == 0) {
             return null;
         } else if ($count == 1) {
             return $expressions[0];
         }
+
+
+        $expressions = $this->_reduceUnaryExpressions($expressions);
+
+        $count = count($expressions);
+
         $expr = $this->_builder->buildASTExpression();
         foreach ($expressions as $node) {
             $expr->addChild($node);
@@ -2074,6 +2099,50 @@ class PHP_Depend_Parser implements PHP_Depend_ConstantsI
         );
 
         return $expr;
+    }
+
+    /**
+     * This method takes the given expression array and reduces the right
+     * sibling of each unary expression node. This means the right sibling will
+     * become a child of the unary expression.
+     *
+     * <code>
+     * // Input code
+     * !$foo || $bar
+     *
+     * // Input expression tree
+     * - ASTUnaryExpression
+     * - ASTVariable
+     * - ASTBooleanOrExpression
+     * - ASTVariable
+     *
+     * // Reduced expression tree
+     * - ASTUnaryExpression
+     *   - ASTVariable
+     * - ASTBooleanOrExpression
+     * - ASTVariable
+     * </code>
+     *
+     * @param array(PHP_Depend_Code_ASTExpression) $expressions Input array that
+     *        contains all parsed expression nodes.
+     *
+     * @return array(PHP_Depend_Code_ASTExpression)
+     * @since 0.9.13
+     */
+    private function _reduceUnaryExpressions(array $expressions)
+    {
+        for ($i = count($expressions) - 2; $i >= 0; --$i) {
+            $expr = $expressions[$i];
+            if ($expr instanceof PHP_Depend_Code_ASTUnaryExpression) {
+                $child = $expressions[$i + 1];
+                unset($expressions[$i + 1]);
+
+                $expr->addChild($child);
+                $expr->setEndLine($child->getEndLine());
+                $expr->setEndColumn($child->getEndColumn());
+            }
+        }
+        return array_values($expressions);
     }
 
     /**
@@ -3880,6 +3949,29 @@ class PHP_Depend_Parser implements PHP_Depend_ConstantsI
     private function _parseSilenceOperator()
     {
         $token = $this->_consumeToken(self::T_AT);
+
+        $expr = $this->_builder->buildASTUnaryExpression($token->image);
+        $expr->setStartLine($token->startLine);
+        $expr->setStartColumn($token->startColumn);
+
+        return $expr;
+    }
+
+    /**
+     * Parses the negate operator expression.
+     *
+     * <code>
+     * //     -
+     * $foo = !$bar->baz();
+     * //     -
+     * </code>
+     *
+     * @return PHP_Depend_Code_ASTUnaryExpression
+     * @since 0.9.13
+     */
+    private function _parseNegateOperator()
+    {
+        $token = $this->_consumeToken(self::T_EXCLAMATION_MARK);
 
         $expr = $this->_builder->buildASTUnaryExpression($token->image);
         $expr->setStartLine($token->startLine);

@@ -67,6 +67,93 @@ require_once 'PHP/Depend/Code/ASTUnaryExpression.php';
 class PHP_Depend_Code_ASTUnaryExpressionTest extends PHP_Depend_Code_ASTNodeTest
 {
     /**
+     * testUnaryExpressionGraphForSilenceOperator
+     *
+     * <code>
+     * @strlen($arg);
+     * </code>
+     *
+     * @return void
+     * @covers PHP_Depend_Parser
+     * @covers PHP_Depend_Builder_Default
+     * @covers PHP_Depend_Code_ASTUnaryExpression
+     * @group pdepend
+     * @group pdepend::ast
+     * @group unittest
+     */
+    public function testUnaryExpressionGraphForSilenceOperator()
+    {
+        $expr = $this->_getFirstUnaryExpressionInFunction(__METHOD__);
+        $this->assertGraphEquals(
+            $expr,
+            array(
+                PHP_Depend_Code_ASTFunctionPostfix::CLAZZ,
+                PHP_Depend_Code_ASTIdentifier::CLAZZ,
+                PHP_Depend_Code_ASTArguments::CLAZZ,
+                PHP_Depend_Code_ASTVariable::CLAZZ
+            )
+        );
+    }
+
+    /**
+     * testUnaryExpressionGraphForNegateOperator
+     *
+     * <code>
+     * !isset($array[0]);
+     * </code>
+     *
+     * @return void
+     * @covers PHP_Depend_Parser
+     * @covers PHP_Depend_Builder_Default
+     * @covers PHP_Depend_Code_ASTUnaryExpression
+     * @group pdepend
+     * @group pdepend::ast
+     * @group unittest
+     */
+    public function testUnaryExpressionGraphForNegateOperator()
+    {
+        $expr = $this->_getFirstUnaryExpressionInFunction(__METHOD__);
+        $this->assertGraphEquals(
+            $expr,
+            array(
+                PHP_Depend_Code_ASTIssetExpression::CLAZZ,
+                PHP_Depend_Code_ASTArrayIndexExpression::CLAZZ,
+                PHP_Depend_Code_ASTVariable::CLAZZ,
+                PHP_Depend_Code_ASTLiteral::CLAZZ
+            )
+        );
+    }
+
+    /**
+     * testUnaryExpressionGraphForNestedOperators
+     *
+     * <code>
+     * !@$args[1];
+     * </code>
+     *
+     * @return void
+     * @covers PHP_Depend_Parser
+     * @covers PHP_Depend_Builder_Default
+     * @covers PHP_Depend_Code_ASTUnaryExpression
+     * @group pdepend
+     * @group pdepend::ast
+     * @group unittest
+     */
+    public function testUnaryExpressionGraphForNestedOperators()
+    {
+        $expr = $this->_getFirstUnaryExpressionInFunction(__METHOD__);
+        $this->assertGraphEquals(
+            $expr,
+            array(
+                PHP_Depend_Code_ASTUnaryExpression::CLAZZ,
+                PHP_Depend_Code_ASTArrayIndexExpression::CLAZZ,
+                PHP_Depend_Code_ASTVariable::CLAZZ,
+                PHP_Depend_Code_ASTLiteral::CLAZZ
+            )
+        );
+    }
+
+    /**
      * testSilenceExpressionHasExpectedStartLine
      *
      * @return void
@@ -129,6 +216,74 @@ class PHP_Depend_Code_ASTUnaryExpressionTest extends PHP_Depend_Code_ASTNodeTest
      * @group unittest
      */
     public function testSilenceExpressionHasExpectedEndColumn()
+    {
+        $expr = $this->_getFirstUnaryExpressionInFunction(__METHOD__);
+        $this->assertEquals(5, $expr->getEndColumn());
+    }
+
+    /**
+     * testNotExpressionHasExpectedStartLine
+     *
+     * @return void
+     * @covers PHP_Depend_Parser
+     * @covers PHP_Depend_Builder_Default
+     * @covers PHP_Depend_Code_ASTUnaryExpression
+     * @group pdepend
+     * @group pdepend::ast
+     * @group unittest
+     */
+    public function testNotExpressionHasExpectedStartLine()
+    {
+        $expr = $this->_getFirstUnaryExpressionInFunction(__METHOD__);
+        $this->assertEquals(4, $expr->getStartLine());
+    }
+
+    /**
+     * testNotExpressionHasExpectedStartColumn
+     *
+     * @return void
+     * @covers PHP_Depend_Parser
+     * @covers PHP_Depend_Builder_Default
+     * @covers PHP_Depend_Code_ASTUnaryExpression
+     * @group pdepend
+     * @group pdepend::ast
+     * @group unittest
+     */
+    public function testNotExpressionHasExpectedStartColumn()
+    {
+        $expr = $this->_getFirstUnaryExpressionInFunction(__METHOD__);
+        $this->assertEquals(12, $expr->getStartColumn());
+    }
+
+    /**
+     * testNotExpressionHasExpectedEndLine
+     *
+     * @return void
+     * @covers PHP_Depend_Parser
+     * @covers PHP_Depend_Builder_Default
+     * @covers PHP_Depend_Code_ASTUnaryExpression
+     * @group pdepend
+     * @group pdepend::ast
+     * @group unittest
+     */
+    public function testNotExpressionHasExpectedEndLine()
+    {
+        $expr = $this->_getFirstUnaryExpressionInFunction(__METHOD__);
+        $this->assertEquals(8, $expr->getEndLine());
+    }
+
+    /**
+     * testNotExpressionHasExpectedEndColumn
+     *
+     * @return void
+     * @covers PHP_Depend_Parser
+     * @covers PHP_Depend_Builder_Default
+     * @covers PHP_Depend_Code_ASTUnaryExpression
+     * @group pdepend
+     * @group pdepend::ast
+     * @group unittest
+     */
+    public function testNotExpressionHasExpectedEndColumn()
     {
         $expr = $this->_getFirstUnaryExpressionInFunction(__METHOD__);
         $this->assertEquals(5, $expr->getEndColumn());
