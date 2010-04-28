@@ -65,6 +65,29 @@ require_once 'PHP/Depend/Tokenizer/Internal.php';
 class PHP_Depend_ParserTest extends PHP_Depend_AbstractTest
 {
     /**
+     * testParserHandlesMaxNestingLevel
+     * 
+     * @return void
+     * @covers PHP_Depend_Parser
+     * @group pdepend
+     * @group pdepend::parser
+     * @group unittest
+     */
+    public function testParserHandlesMaxNestingLevel()
+    {
+        ini_set('xdebug.max_nesting_level', 50);
+
+        $builder = new PHP_Depend_Builder_Default();
+
+        $tokenizer = new PHP_Depend_Tokenizer_Internal();
+        $tokenizer->setSourceFile(self::createCodeResourceURI('parser/' . __FUNCTION__ . '.php'));
+
+        $parser = new PHP_Depend_Parser($tokenizer, $builder);
+        $parser->setMaxNestingLevel(512);
+        $parser->parse();
+    }
+
+    /**
      * Tests the main parse method.
      *
      * @return void
@@ -72,9 +95,9 @@ class PHP_Depend_ParserTest extends PHP_Depend_AbstractTest
     public function testParseMixedCode()
     {
         $expected = array(
-            'pkg1'                                         =>  true,
-            'pkg2'                                         =>  true,
-            'pkg3'                                         =>  true,
+            'pkg1'                                =>  true,
+            'pkg2'                                =>  true,
+            'pkg3'                                =>  true,
             PHP_Depend_BuilderI::DEFAULT_PACKAGE  =>  true
         );
 
@@ -471,10 +494,14 @@ class PHP_Depend_ParserTest extends PHP_Depend_AbstractTest
      * Tests that the parser handles PHP 5.3 object namespace + class chaining.
      *
      * @return void
+     * @covers PHP_Depend_Parser
+     * @group pdepend
+     * @group pdepend::parser
+     * @group unittest
      */
     public function testParserParseNewInstancePHP53()
     {
-        $packages = self::parseSource('php-5.3/new.txt');
+        $packages = self::parseTestCaseSource();
         $function = $packages->current()
             ->getFunctions()
             ->current();
@@ -2100,6 +2127,21 @@ class PHP_Depend_ParserTest extends PHP_Depend_AbstractTest
                             ->getPackage();
 
         $this->assertSame('PHP\Depend', $package->getName());
+    }
+
+    /**
+     * Parses the given source file or directory with the default tokenizer
+     * and node builder implementations.
+     *
+     * @param string  $testCase          Qualified name of the test case.
+     * @param boolean $ignoreAnnotations The parser should ignore annotations.
+     *
+     * @return PHP_Depend_Code_NodeIterator
+     */
+    public static function parseTestCaseSource($testCase = null, $ignoreAnnotations = false)
+    {
+        $trace = debug_backtrace();
+        return self::parseSource('parser/' . $trace[1]['function'] . '.php');
     }
 
     /**

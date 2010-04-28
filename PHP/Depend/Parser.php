@@ -51,6 +51,7 @@ require_once 'PHP/Depend/TokenizerI.php';
 require_once 'PHP/Depend/Code/Value.php';
 require_once 'PHP/Depend/Util/Log.php';
 require_once 'PHP/Depend/Util/Type.php';
+require_once 'PHP/Depend/Util/UuidBuilder.php';
 require_once 'PHP/Depend/Parser/SymbolTable.php';
 require_once 'PHP/Depend/Parser/TokenStack.php';
 require_once 'PHP/Depend/Parser/InvalidStateException.php';
@@ -232,11 +233,27 @@ class PHP_Depend_Parser implements PHP_Depend_ConstantsI
     private $_tokenStack = null;
 
     /**
+     * Used identifier builder instance.
+     *
+     * @var PHP_Depend_Util_UuidBuilder
+     * @since 0.9.12
+     */
+    private $_uuidBuilder = null;
+
+    /**
      * Used function name parser.
      *
      * @var PHP_Depend_Parser_FunctionNameParser
      */
     private $_functionNameParser = null;
+
+    /**
+     * The maximum valid nesting level allowed.
+     *
+     * @var integer
+     * @since 0.9.12
+     */
+    private $_maxNestingLevel = 1024;
 
     /**
      * Constructs a new source parser.
@@ -251,6 +268,7 @@ class PHP_Depend_Parser implements PHP_Depend_ConstantsI
         $this->_tokenizer = $tokenizer;
         $this->_builder   = $builder;
 
+        $this->_uuidBuilder    = new PHP_Depend_Util_UuidBuilder();
         $this->_tokenStack     = new PHP_Depend_Parser_TokenStack();
         $this->_useSymbolTable = new PHP_Depend_Parser_SymbolTable(true);
     }
@@ -302,6 +320,30 @@ class PHP_Depend_Parser implements PHP_Depend_ConstantsI
     }
 
     /**
+     * Configures the maximum allowed nesting level.
+     *
+     * @param integer $maxNestingLevel The maximum allowed nesting level.
+     *
+     * @return void
+     * @since 0.9.12
+     */
+    public function setMaxNestingLevel($maxNestingLevel)
+    {
+        $this->_maxNestingLevel = $maxNestingLevel;
+    }
+
+    /**
+     * Returns the maximum allowed nesting/recursion level.
+     *
+     * @return integer
+     * @since 0.9.12
+     */
+    protected function getMaxNestingLevel()
+    {
+        return $this->_maxNestingLevel;
+    }
+
+    /**
      * Parses the contents of the tokenizer and generates a node tree based on
      * the found tokens.
      *
@@ -309,15 +351,16 @@ class PHP_Depend_Parser implements PHP_Depend_ConstantsI
      */
     public function parse()
     {
-        // Get currently parsed source file
+        $this->setUpEnvironment();
+
+       // Get currently parsed source file
         $this->_sourceFile = $this->_tokenizer->getSourceFile();
+        $this->_sourceFile->setUUID(
+            $this->_uuidBuilder->forFile($this->_sourceFile)
+        );
 
         // Debug currently parsed source file.
         PHP_Depend_Util_Log::debug('Processing file ' . $this->_sourceFile);
-
-        $this->_useSymbolTable->createScope();
-
-        $this->reset();
 
         $tokenType = $this->_tokenizer->peek();
         while ($tokenType !== self::T_EOF) {
@@ -375,6 +418,34 @@ class PHP_Depend_Parser implements PHP_Depend_ConstantsI
             $tokenType = $this->_tokenizer->peek();
         }
 
+        $this->tearDownEnvironment();
+    }
+
+    /**
+     * Initializes the parser environment.
+     *
+     * @return void
+     * @since 0.9.12
+     */
+    protected function setUpEnvironment()
+    {
+        ini_set('xdebug.max_nesting_level', $this->getMaxNestingLevel());
+
+        $this->_useSymbolTable->createScope();
+
+        $this->reset();
+    }
+
+    /**
+     * Restores the parser environment back.
+     *
+     * @return void
+     * @since 0.9.12
+     */
+    protected function tearDownEnvironment()
+    {
+        ini_restore('xdebug.max_nesting_level');
+
         $this->_useSymbolTable->destroyScope();
     }
 
@@ -413,6 +484,7 @@ class PHP_Depend_Parser implements PHP_Depend_ConstantsI
         $interface = $this->_builder->buildInterface($qualifiedName);
         $interface->setSourceFile($this->_sourceFile);
         $interface->setDocComment($this->_docComment);
+        $interface->setUUID($this->_uuidBuilder->forClassOrInterface($interface));
         $interface->setUserDefined();
 
         // Strip comments and fetch next token type
@@ -465,6 +537,7 @@ class PHP_Depend_Parser implements PHP_Depend_ConstantsI
         $class->setSourceFile($this->_sourceFile);
         $class->setModifiers($this->_modifiers);
         $class->setDocComment($this->_docComment);
+        $class->setUUID($this->_uuidBuilder->forClassOrInterface($class));
         $class->setUserDefined();
 
         $this->_consumeComments();
@@ -722,7 +795,10 @@ class PHP_Depend_Parser implements PHP_Depend_ConstantsI
 
             case self::T_FUNCTION:
                 $method = $this->_parseMethodDeclaration();
+                $method->setParent($this->_classOrInterface);
                 $method->setModifiers($modifiers);
+                $method->setSourceFile($this->_sourceFile);
+                $method->setUUID($this->_uuidBuilder->forMethod($method));
                 $method->setTokens($this->_tokenStack->pop());
                 return $method;
 
@@ -820,11 +896,13 @@ class PHP_Depend_Parser implements PHP_Depend_ConstantsI
 
         if ($this->_isNextTokenFormalParameterList()) {
             $callable = $this->_parseClosureDeclaration();
+            $callable->setSourceFile($this->_sourceFile);
         } else {
             $callable = $this->_parseFunctionDeclaration();
+            $callable->setSourceFile($this->_sourceFile);
+            $callable->setUUID($this->_uuidBuilder->forFunction($callable));
         }
 
-        $callable->setSourceFile($this->_sourceFile);
         $callable->setDocComment($this->_docComment);
         $callable->setTokens($this->_tokenStack->pop());
         $this->_prepareCallable($callable);
@@ -958,9 +1036,7 @@ class PHP_Depend_Parser implements PHP_Depend_ConstantsI
     private function _parseClosureDeclaration()
     {
         $closure = $this->_builder->buildClosure();
-        $closure->addChild(
-            $this->_parseFormalParameters()
-        );
+        $closure->addChild($this->_parseFormalParameters());
 
         $this->_consumeComments();
         if ($this->_tokenizer->peek() === self::T_USE) {
