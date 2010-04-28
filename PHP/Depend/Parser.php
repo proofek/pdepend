@@ -1859,6 +1859,10 @@ class PHP_Depend_Parser implements PHP_Depend_ConstantsI
                 $expressions[] = $this->_parseLiteralOrString();
                 break;
 
+            case self::T_AT:
+                $expressions[] = $this->_parseSilenceOperator();
+                break;
+
             case self::T_NEW:
                 $expressions[] = $this->_parseAllocationExpression();
                 break;
@@ -3783,6 +3787,29 @@ class PHP_Depend_Parser implements PHP_Depend_ConstantsI
         );
 
         return $node;
+    }
+
+    /**
+     * Parses a php silence operator expression.
+     *
+     * <code>
+     * //     -
+     * $foo = @$bar->baz();
+     * //     -
+     * </code>
+     *
+     * @return PHP_Depend_Code_ASTUnaryExpression
+     * @since 0.9.13
+     */
+    private function _parseSilenceOperator()
+    {
+        $token = $this->_consumeToken(self::T_AT);
+
+        $expr = $this->_builder->buildASTUnaryExpression($token->image);
+        $expr->setStartLine($token->startLine);
+        $expr->setStartColumn($token->startColumn);
+
+        return $expr;
     }
 
     /**
