@@ -56,15 +56,14 @@ require_once 'PHP/Depend/Code/ASTClassOrInterfaceReference.php';
  * @category   PHP
  * @package    PHP_Depend
  * @subpackage Code
- * @author     Manuel Pichler <mapi@pdepend.org>
- * @copyright  2008-2010 Manuel Pichler. All rights reserved.
+ * @author     Jan Schumann <js@schumann-it.com>
+ * @copyright  2008-2010 Jan Schumann. All rights reserved.
  * @license    http://www.opensource.org/licenses/bsd-license.php  BSD License
  * @version    Release: @package_version@
- * @link       http://www.pdepend.org/
- * @since      0.9.6
+ * @link       http://pdepend.org/
  */
-class PHP_Depend_Code_ASTSelfReference
-    extends PHP_Depend_Code_ASTClassOrInterfaceReference
+final class PHP_Depend_Code_ASTThisReference
+    extends PHP_Depend_Code_ASTSelfReference
 {
     /**
      * The image type of this node.
@@ -74,10 +73,10 @@ class PHP_Depend_Code_ASTSelfReference
     /**
      * The source image of this node.
      */
-    const IMAGE = 'self';
+    const IMAGE = '$this';
 
     /**
-     * Constructs a new type holder instance.
+     * Constructs a new type holder instance. Has to be overridden due to PHP5 < 5.3
      *
      * @param PHP_Depend_Code_AbstractClassOrInterface $type The type instance
      *        that reference the concrete target of self.
@@ -87,20 +86,5 @@ class PHP_Depend_Code_ASTSelfReference
     ) {
         $this->image        = self::IMAGE;
         $this->typeInstance = $type;
-    }
-
-    /**
-     * Accept method of the visitor design pattern. This method will be called
-     * by a visitor during tree traversal.
-     *
-     * @param PHP_Depend_Code_ASTVisitorI $visitor The calling visitor instance.
-     * @param mixed                       $data    Optional previous calculated data.
-     *
-     * @return mixed
-     * @since 0.9.12
-     */
-    public function accept(PHP_Depend_Code_ASTVisitorI $visitor, $data = null)
-    {
-        return $visitor->visitSelfReference($this, $data);
     }
 }

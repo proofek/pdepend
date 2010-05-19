@@ -89,7 +89,12 @@ class PHP_Depend_Metrics_ClassLevel_Analyzer
           M_PROPERTIES_NON_PRIVATE       = 'varsnp',
           M_WEIGHTED_METHODS             = 'wmc',
           M_WEIGHTED_METHODS_INHERIT     = 'wmci',
-          M_WEIGHTED_METHODS_NON_PRIVATE = 'wmcnp';
+          M_WEIGHTED_METHODS_NON_PRIVATE = 'wmcnp',
+          M_BASE_CLASS_OVERRIDING_RATIO  = 'bovr',
+          M_BASE_CLASS_USAGE_RATIO       = 'bur',
+          M_PNAS                         = 'pnas',
+          M_NUMBER_OF_NEW_SERVICES       = 'nnas';
+
 
     /**
      * Hash with all calculated node metrics.
@@ -181,6 +186,23 @@ class PHP_Depend_Metrics_ClassLevel_Analyzer
     }
 
     /**
+     * Returns the number of properties the given <b>$node</b>
+     * instance.
+     *
+     * @param PHP_Depend_Code_NodeI $node The context node instance.
+     *
+     * @return integer
+     */
+    public function getPropertyCount(PHP_Depend_Code_NodeI $node)
+    {
+        $metrics = $this->getNodeMetrics($node);
+        if (isset($metrics[self::M_PROPERTIES])) {
+            return $metrics[self::M_PROPERTIES];
+        }
+        return 0;
+    }
+
+    /**
      * This method will return an <b>array</b> with all generated metric values
      * for the given <b>$node</b>. If there are no metrics for the requested
      * node, this method will return an empty <b>array</b>.
@@ -219,7 +241,8 @@ class PHP_Depend_Metrics_ClassLevel_Analyzer
             self::M_PROPERTIES_NON_PRIVATE       => 0,
             self::M_WEIGHTED_METHODS             => 0,
             self::M_WEIGHTED_METHODS_INHERIT     => $this->_calculateWMCi($class),
-            self::M_WEIGHTED_METHODS_NON_PRIVATE => 0
+            self::M_WEIGHTED_METHODS_NON_PRIVATE => 0,
+            self::M_BASE_CLASS_OVERRIDING_RATIO  => $this->_calculateBOvR($class),
         );
 
         foreach ($class->getProperties() as $property) {
@@ -374,5 +397,45 @@ class PHP_Depend_Metrics_ClassLevel_Analyzer
             $parent = $parent->getParentClass();
         }
         return array_sum($ccn);
+    }
+
+    /**
+     * Calculates the Base Class Overriding Ratio metric, which is the number of
+     * methods that override methods of the parent class devided by the total number of methods in the calss
+     * [0..1]
+     *
+     * @param PHP_Depend_Code_Class $class The context class instance.
+     *
+     * @return integer
+     */
+    private function _calculateBOvR(PHP_Depend_Code_Class $class)
+    {
+        $classMethods = array();
+        $overriddenMethods = array();
+
+        foreach ($class->getMethods() as $m) {
+            if (!$m->isAbstract() && !$m->isStatic() && '__construct' !== $m->getName() && $class->getName() !== $m->getName())
+            {
+                $classMethods[$m->getName()] = $m->getName();
+            }
+        }
+
+        if (0 < count($classMethods))
+        {
+            $parent = $class->getParentClass();
+            while ($parent !== null) {
+                // Count all methods
+                foreach ($parent->getMethods() as $m) {
+                    if(isset($classMethods[$m->getName()]) && !$m->isAbstract() && !$m->isStatic() && '__construct' !== $m->getName() && $parent->getName() !== $m->getName()) {
+                        $overriddenMethods[$m->getName()] = $m->getName();
+                    }
+                }
+                // Fetch parent class
+                $parent = $parent->getParentClass();
+            }
+            var_dump($classMethods);
+            var_dump($overriddenMethods);
+        }
+        return count($classMethods) > 0 ? count($overriddenMethods) / count($classMethods) : 0;
     }
 }

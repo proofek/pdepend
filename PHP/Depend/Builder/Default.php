@@ -237,7 +237,7 @@ class PHP_Depend_Builder_Default implements PHP_Depend_BuilderI
     public function buildClass($name)
     {
         $this->checkBuilderState();
-        
+
         $className   = $this->extractTypeName($name);
         $packageName = $this->extractPackageName($name);
 
@@ -279,7 +279,7 @@ class PHP_Depend_Builder_Default implements PHP_Depend_BuilderI
     public function buildASTClassReference($qualifiedName)
     {
         $this->checkBuilderState();
-        
+
         include_once 'PHP/Depend/Code/ASTClassReference.php';
 
         // Debug method creation
@@ -346,7 +346,7 @@ class PHP_Depend_Builder_Default implements PHP_Depend_BuilderI
     public function buildInterface($name)
     {
         $this->checkBuilderState();
-        
+
         $interfaceName = $this->extractTypeName($name);
         $packageName   = $this->extractPackageName($name);
 
@@ -376,7 +376,7 @@ class PHP_Depend_Builder_Default implements PHP_Depend_BuilderI
         }
         return $interface;
     }
-    
+
     /**
      * Builds a new code type reference instance.
      *
@@ -458,7 +458,7 @@ class PHP_Depend_Builder_Default implements PHP_Depend_BuilderI
         // Create new function
         $function = new PHP_Depend_Code_Function($name);
         $function->setSourceFile($this->defaultFile);
- 
+
         return $function;
     }
 
@@ -586,6 +586,25 @@ class PHP_Depend_Builder_Default implements PHP_Depend_BuilderI
     public function buildASTVariable($image)
     {
         return $this->_buildASTNodeInstance('ASTVariable', $image);
+    }
+
+    /**
+     * Builds a new thisvariable node.
+     *
+     * @param PHP_Depend_Code_AbstractClassOrInterface $type
+     * @return PHP_Depend_Code_ASTThisVariable
+     * @since 0.9.8
+     */
+    public function buildASTThisReference(
+        PHP_Depend_Code_AbstractClassOrInterface $type
+    ) {
+        include_once 'PHP/Depend/Code/ASTThisReference.php';
+
+        PHP_Depend_Util_Log::debug(
+            'Creating: PHP_Depend_Code_ASTThisReference(' . $type->getName() . ')'
+        );
+
+        return new PHP_Depend_Code_ASTThisReference($type);
     }
 
     /**

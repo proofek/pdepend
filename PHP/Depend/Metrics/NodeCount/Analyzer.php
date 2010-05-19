@@ -129,6 +129,23 @@ class PHP_Depend_Metrics_NodeCount_Analyzer
     private $_nodeMetrics = null;
 
     /**
+     * Returns the number of methods for the given <b>$node</b>
+     * instance.
+     *
+     * @param PHP_Depend_Code_NodeI $node The context node instance.
+     *
+     * @return integer
+     */
+    public function getMethodCount(PHP_Depend_Code_NodeI $node)
+    {
+        $metrics = $this->getNodeMetrics($node);
+        if (isset($metrics[self::M_NUMBER_OF_METHODS])) {
+            return $metrics[self::M_NUMBER_OF_METHODS];
+        }
+        return 0;
+    }
+
+    /**
      * This method will return an <b>array</b> with all generated metric values
      * for the given <b>$node</b> instance. If there are no metrics for the
      * requested node, this method will return an empty <b>array</b>.
