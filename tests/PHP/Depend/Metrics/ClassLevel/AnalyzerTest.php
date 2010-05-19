@@ -1,7 +1,7 @@
 <?php
 /**
  * This file is part of PHP_Depend.
- * 
+ *
  * PHP Version 5
  *
  * Copyright (c) 2008-2010, Manuel Pichler <mapi@pdepend.org>.
@@ -85,35 +85,425 @@ class PHP_Depend_Metrics_ClassLevel_AnalyzerTest extends PHP_Depend_Metrics_Abst
      * @group unittest
      * @expectedException RuntimeException
      */
-    public function testAnalyzerFailsWithoutCCAnalyzerFail()
-    {
-        $package  = new PHP_Depend_Code_Package('package1');
-        $packages = new PHP_Depend_Code_NodeIterator(array($package));
+//    public function testAnalyzerFailsWithoutCCAnalyzerFail()
+//    {
+//        $package  = new PHP_Depend_Code_Package('package1');
+//        $packages = new PHP_Depend_Code_NodeIterator(array($package));
+//
+//        $analyzer = new PHP_Depend_Metrics_ClassLevel_Analyzer();
+//        $analyzer->analyze($packages);
+//    }
+//
+//    /**
+//     * Tests that {@link PHP_Depend_Metrics_ClassLevel_Analyzer::addAnalyzer()}
+//     * fails for an invalid child analyzer.
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     * @expectedException InvalidArgumentException
+//     */
+//    public function testAddAnalyzerFailsForAnInvalidAnalyzerTypeFail()
+//    {
+//        $analyzer = new PHP_Depend_Metrics_ClassLevel_Analyzer();
+//        $analyzer->addAnalyzer(new PHP_Depend_Metrics_CodeRank_Analyzer());
+//    }
+//
+//    /**
+//     * Tests that the analyzer calculates the correct IMPL values.
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateIMPLMetric()
+//    {
+//        $this->assertEquals(4, $this->_calculateMetric(__METHOD__, 'impl'));
+//    }
+//
+//    /**
+//     * Tests that the analyzer calculates the correct IMPL values.
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateIMPLMetric1()
+//    {
+//        $this->assertEquals(6, $this->_calculateMetric(__METHOD__, 'impl'));
+//    }
+//
+//    /**
+//     * Tests that the analyzer calculates the correct IMPL values.
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateIMPLMetric2()
+//    {
+//        $this->assertEquals(2, $this->_calculateMetric(__METHOD__, 'impl'));
+//    }
+//
+//    /**
+//     * testCalculateIMPLMetricContainsUnknownImplementedInterface
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateIMPLMetricContainsUnknownImplementedInterface()
+//    {
+//        $this->assertEquals(1, $this->_calculateMetric(__METHOD__, 'impl'));
+//    }
+//
+//    /**
+//     * testCalculateIMPLMetricContainsUnknownIndirectImplementedInterface
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateIMPLMetricContainsUnknownIndirectImplementedInterface()
+//    {
+//        $this->assertEquals(1, $this->_calculateMetric(__METHOD__, 'impl'));
+//    }
+//
+//    /**
+//     * testCalculateIMPLMetricContainsInternalImplementedInterface
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateIMPLMetricContainsInternalImplementedInterface()
+//    {
+//        $this->assertEquals(1, $this->_calculateMetric(__METHOD__, 'impl'));
+//    }
+//
+//    /**
+//     * Tests that the calculated Class Interface Size(CSI) is correct.
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateCISMetricZeroInheritance()
+//    {
+//        $this->assertEquals(2, $this->_calculateMetric(__METHOD__, 'cis'));
+//    }
+//
+//    /**
+//     * Tests that the calculated Class Interface Size(CSI) is correct.
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateCISMetricOneLevelInheritance()
+//    {
+//        $this->assertEquals(2, $this->_calculateMetric(__METHOD__, 'cis'));
+//    }
+//
+//    /**
+//     * Tests that the calculated Class Interface Size(CSI) is correct.
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateCISMetricTwoLevelInheritance()
+//    {
+//        $this->assertEquals(3, $this->_calculateMetric(__METHOD__, 'cis'));
+//    }
+//
+//    /**
+//     * Tests that the calculated Class SiZe(CSZ) metric is correct.
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateCSZMetricZeroInheritance()
+//    {
+//        $this->assertEquals(6, $this->_calculateMetric(__METHOD__, 'csz'));
+//    }
+//
+//    /**
+//     * Tests that the calculated Class SiZe(CSZ) metric is correct.
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateCSZMetricOneLevelInheritance()
+//    {
+//        $this->assertEquals(4, $this->_calculateMetric(__METHOD__, 'csz'));
+//    }
+//
+//    /**
+//     * Tests that the analyzer calculates the correct VARS metric
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateVARSMetricZeroInheritance()
+//    {
+//        $this->assertEquals(1, $this->_calculateMetric(__METHOD__, 'vars'));
+//    }
+//
+//    /**
+//     * Tests that the analyzer calculates the correct VARS metric
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateVARSMetricOneLevelInheritance()
+//    {
+//        $this->assertEquals(3, $this->_calculateMetric(__METHOD__, 'vars'));
+//    }
+//
+//    /**
+//     * Tests that the analyzer calculates the correct VARSi metric
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateVARSiMetric()
+//    {
+//        $this->assertEquals(4, $this->_calculateMetric(__METHOD__, 'varsi'));
+//    }
+//
+//    /**
+//     * Tests that the analyzer calculates the correct VARSi metric
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateVARSiMetricWithInheritance()
+//    {
+//        $this->assertEquals(5, $this->_calculateMetric(__METHOD__, 'varsi'));
+//    }
+//
+//    /**
+//     * Tests that the analyzer calculates the correct VARSnp metric
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateVARSnpMetric()
+//    {
+//        $this->assertEquals(2, $this->_calculateMetric(__METHOD__, 'varsnp'));
+//    }
+//
+//    /**
+//     * Tests that the analyzer calculates the correct VARSnp metric
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateVARSnpMetricWithInheritance()
+//    {
+//        $this->assertEquals(1, $this->_calculateMetric(__METHOD__, 'varsnp'));
+//    }
+//
+//    /**
+//     * Tests that the analyzer calculates the correct WMC metric.
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateWMCMetric()
+//    {
+//        $this->assertEquals(3, $this->_calculateMetric(__METHOD__, 'wmc'));
+//    }
+//
+//    /**
+//     * Tests that the analyzer calculates the correct WMC metric.
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateWMCMetricOneLevelInheritance()
+//    {
+//        $this->assertEquals(3, $this->_calculateMetric(__METHOD__, 'wmc'));
+//    }
+//
+//    /**
+//     * Tests that the analyzer calculates the correct WMC metric.
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateWMCMetricTwoLevelInheritance()
+//    {
+//        $this->assertEquals(3, $this->_calculateMetric(__METHOD__, 'wmc'));
+//    }
+//
+//    /**
+//     * Tests that the analyzer calculates the correct WMCi metric.
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateWMCiMetric()
+//    {
+//        $this->assertEquals(3, $this->_calculateMetric(__METHOD__, 'wmci'));
+//    }
+//
+//    /**
+//     * Tests that the analyzer calculates the correct WMCi metric.
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateWMCiMetricOneLevelInheritance()
+//    {
+//        $this->assertEquals(4, $this->_calculateMetric(__METHOD__, 'wmci'));
+//    }
+//
+//    /**
+//     * Tests that the analyzer calculates the correct WMCi metric.
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateWMCiMetricTwoLevelInheritance()
+//    {
+//        $this->assertEquals(5, $this->_calculateMetric(__METHOD__, 'wmci'));
+//    }
+//
+//    /**
+//     * Tests that the analyzer calculates the correct WMCnp metric.
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateWMCnpMetric()
+//    {
+//        $this->assertEquals(1, $this->_calculateMetric(__METHOD__, 'wmcnp'));
+//    }
+//
+//    /**
+//     * Tests that the analyzer calculates the correct WMCnp metric.
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateWMCnpMetricOneLevelInheritance()
+//    {
+//        $this->assertEquals(2, $this->_calculateMetric(__METHOD__, 'wmcnp'));
+//    }
+//
+//    /**
+//     * Tests that the analyzer calculates the correct WMCnp metric.
+//     *
+//     * @return void
+//     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+//     * @group pdepend
+//     * @group pdepend::metrics
+//     * @group pdepend::metrics::classlevel
+//     * @group unittest
+//     */
+//    public function testCalculateWMCnpMetricTwoLevelInheritance()
+//    {
+//        $this->assertEquals(1, $this->_calculateMetric(__METHOD__, 'wmcnp'));
+//    }
 
-        $analyzer = new PHP_Depend_Metrics_ClassLevel_Analyzer();
-        $analyzer->analyze($packages);
-    }
-    
     /**
-     * Tests that {@link PHP_Depend_Metrics_ClassLevel_Analyzer::addAnalyzer()}
-     * fails for an invalid child analyzer.
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     * @expectedException InvalidArgumentException
-     */
-    public function testAddAnalyzerFailsForAnInvalidAnalyzerTypeFail()
-    {
-        $analyzer = new PHP_Depend_Metrics_ClassLevel_Analyzer();
-        $analyzer->addAnalyzer(new PHP_Depend_Metrics_CodeRank_Analyzer());
-    }
-    
-    /**
-     * Tests that the analyzer calculates the correct IMPL values.
+     * Tests that the analyzer calculates the correct BOvR metric.
      *
      * @return void
      * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
@@ -122,13 +512,13 @@ class PHP_Depend_Metrics_ClassLevel_AnalyzerTest extends PHP_Depend_Metrics_Abst
      * @group pdepend::metrics::classlevel
      * @group unittest
      */
-    public function testCalculateIMPLMetric()
+    public function testCalculateBovrMetricWithAllMethodsOverridden()
     {
-        $this->assertEquals(4, $this->_calculateMetric(__METHOD__, 'impl'));
+        $this->assertEquals(1, $this->_calculateMetric(__METHOD__, 'bovr'));
     }
 
     /**
-     * Tests that the analyzer calculates the correct IMPL values.
+     * Tests that the analyzer calculates the correct BOvR metric.
      *
      * @return void
      * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
@@ -137,13 +527,13 @@ class PHP_Depend_Metrics_ClassLevel_AnalyzerTest extends PHP_Depend_Metrics_Abst
      * @group pdepend::metrics::classlevel
      * @group unittest
      */
-    public function testCalculateIMPLMetric1()
+    public function testCalculateBovrMetricWithNoMethodsOverridden()
     {
-        $this->assertEquals(6, $this->_calculateMetric(__METHOD__, 'impl'));
+        $this->assertEquals(0, $this->_calculateMetric(__METHOD__, 'bovr'));
     }
 
     /**
-     * Tests that the analyzer calculates the correct IMPL values.
+     * Tests that the analyzer calculates the correct BOvR metric.
      *
      * @return void
      * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
@@ -152,356 +542,10 @@ class PHP_Depend_Metrics_ClassLevel_AnalyzerTest extends PHP_Depend_Metrics_Abst
      * @group pdepend::metrics::classlevel
      * @group unittest
      */
-    public function testCalculateIMPLMetric2()
+    public function testCalculateBovrMetricWith50PMethodsOverridden()
     {
-        $this->assertEquals(2, $this->_calculateMetric(__METHOD__, 'impl'));
+        $this->assertEquals(0.5, $this->_calculateMetric(__METHOD__, 'bovr'));
     }
-
-    /**
-     * testCalculateIMPLMetricContainsUnknownImplementedInterface
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */
-    public function testCalculateIMPLMetricContainsUnknownImplementedInterface()
-    {
-        $this->assertEquals(1, $this->_calculateMetric(__METHOD__, 'impl'));
-    }
-
-    /**
-     * testCalculateIMPLMetricContainsUnknownIndirectImplementedInterface
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */
-    public function testCalculateIMPLMetricContainsUnknownIndirectImplementedInterface()
-    {
-        $this->assertEquals(1, $this->_calculateMetric(__METHOD__, 'impl'));
-    }
-
-    /**
-     * testCalculateIMPLMetricContainsInternalImplementedInterface
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */
-    public function testCalculateIMPLMetricContainsInternalImplementedInterface()
-    {
-        $this->assertEquals(1, $this->_calculateMetric(__METHOD__, 'impl'));
-    }
-    
-    /**
-     * Tests that the calculated Class Interface Size(CSI) is correct.
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */
-    public function testCalculateCISMetricZeroInheritance()
-    {
-        $this->assertEquals(2, $this->_calculateMetric(__METHOD__, 'cis'));
-    }
-
-    /**
-     * Tests that the calculated Class Interface Size(CSI) is correct.
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */
-    public function testCalculateCISMetricOneLevelInheritance()
-    {
-        $this->assertEquals(2, $this->_calculateMetric(__METHOD__, 'cis'));
-    }
-
-    /**
-     * Tests that the calculated Class Interface Size(CSI) is correct.
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */
-    public function testCalculateCISMetricTwoLevelInheritance()
-    {
-        $this->assertEquals(3, $this->_calculateMetric(__METHOD__, 'cis'));
-    }
-    
-    /**
-     * Tests that the calculated Class SiZe(CSZ) metric is correct.
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */
-    public function testCalculateCSZMetricZeroInheritance()
-    {
-        $this->assertEquals(6, $this->_calculateMetric(__METHOD__, 'csz'));
-    }
-
-    /**
-     * Tests that the calculated Class SiZe(CSZ) metric is correct.
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */
-    public function testCalculateCSZMetricOneLevelInheritance()
-    {
-        $this->assertEquals(4, $this->_calculateMetric(__METHOD__, 'csz'));
-    }
-    
-    /**
-     * Tests that the analyzer calculates the correct VARS metric
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */
-    public function testCalculateVARSMetricZeroInheritance()
-    {
-        $this->assertEquals(1, $this->_calculateMetric(__METHOD__, 'vars'));
-    }
-    
-    /**
-     * Tests that the analyzer calculates the correct VARS metric
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */
-    public function testCalculateVARSMetricOneLevelInheritance()
-    {
-        $this->assertEquals(3, $this->_calculateMetric(__METHOD__, 'vars'));
-    }
-    
-    /**
-     * Tests that the analyzer calculates the correct VARSi metric
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */
-    public function testCalculateVARSiMetric()
-    {
-        $this->assertEquals(4, $this->_calculateMetric(__METHOD__, 'varsi'));
-    }
-
-    /**
-     * Tests that the analyzer calculates the correct VARSi metric
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */
-    public function testCalculateVARSiMetricWithInheritance()
-    {
-        $this->assertEquals(5, $this->_calculateMetric(__METHOD__, 'varsi'));
-    }
-    
-    /**
-     * Tests that the analyzer calculates the correct VARSnp metric
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */
-    public function testCalculateVARSnpMetric()
-    {
-        $this->assertEquals(2, $this->_calculateMetric(__METHOD__, 'varsnp'));
-    }
-
-    /**
-     * Tests that the analyzer calculates the correct VARSnp metric
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */
-    public function testCalculateVARSnpMetricWithInheritance()
-    {
-        $this->assertEquals(1, $this->_calculateMetric(__METHOD__, 'varsnp'));
-    }
-    
-    /**
-     * Tests that the analyzer calculates the correct WMC metric. 
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */
-    public function testCalculateWMCMetric()
-    {
-        $this->assertEquals(3, $this->_calculateMetric(__METHOD__, 'wmc'));
-    }
-
-    /**
-     * Tests that the analyzer calculates the correct WMC metric.
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */
-    public function testCalculateWMCMetricOneLevelInheritance()
-    {
-        $this->assertEquals(3, $this->_calculateMetric(__METHOD__, 'wmc'));
-    }
-
-    /**
-     * Tests that the analyzer calculates the correct WMC metric.
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */
-    public function testCalculateWMCMetricTwoLevelInheritance()
-    {
-        $this->assertEquals(3, $this->_calculateMetric(__METHOD__, 'wmc'));
-    }
-    
-    /**
-     * Tests that the analyzer calculates the correct WMCi metric. 
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */    
-    public function testCalculateWMCiMetric()
-    {
-        $this->assertEquals(3, $this->_calculateMetric(__METHOD__, 'wmci'));
-    }
-
-    /**
-     * Tests that the analyzer calculates the correct WMCi metric.
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */
-    public function testCalculateWMCiMetricOneLevelInheritance()
-    {
-        $this->assertEquals(4, $this->_calculateMetric(__METHOD__, 'wmci'));
-    }
-
-    /**
-     * Tests that the analyzer calculates the correct WMCi metric.
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */
-    public function testCalculateWMCiMetricTwoLevelInheritance()
-    {
-        $this->assertEquals(5, $this->_calculateMetric(__METHOD__, 'wmci'));
-    }
-    
-    /**
-     * Tests that the analyzer calculates the correct WMCnp metric. 
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */
-    public function testCalculateWMCnpMetric()
-    {
-        $this->assertEquals(1, $this->_calculateMetric(__METHOD__, 'wmcnp'));
-    }
-
-    /**
-     * Tests that the analyzer calculates the correct WMCnp metric.
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */
-    public function testCalculateWMCnpMetricOneLevelInheritance()
-    {
-        $this->assertEquals(2, $this->_calculateMetric(__METHOD__, 'wmcnp'));
-    }
-
-    /**
-     * Tests that the analyzer calculates the correct WMCnp metric.
-     *
-     * @return void
-     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
-     * @group pdepend
-     * @group pdepend::metrics
-     * @group pdepend::metrics::classlevel
-     * @group unittest
-     */
-    public function testCalculateWMCnpMetricTwoLevelInheritance()
-    {
-        $this->assertEquals(1, $this->_calculateMetric(__METHOD__, 'wmcnp'));
-    }
-
     /**
      * Analyzes the source code associated with the given test case and returns
      * a single measured metric.
