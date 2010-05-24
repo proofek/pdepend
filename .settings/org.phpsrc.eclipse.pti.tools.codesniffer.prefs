@@ -1,0 +1,12 @@
+#Wed May 19 01:03:43 CEST 2010
+active_standards=PEAR
+custom_standard_names=Guj;GujBeta
+custom_standard_paths=M\:\\qm\\codesniffer_standards\\Guj;M\:\\qm\\codesniffer_standards\\GujBeta
+debug_print_output=true
+default_tab_width=2
+eclipse.preferences.version=1
+file_extension=
+ignore_pattern=*/templates/*,*/lib/vendor/*, */vendor/*
+pear_library=<Internal>
+php_executable=PHP 5.2.10 (CLI)
+pref_ignore_sniffs=
