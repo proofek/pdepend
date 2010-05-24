@@ -90,10 +90,12 @@ class PHP_Depend_Metrics_ClassLevel_Analyzer
           M_WEIGHTED_METHODS             = 'wmc',
           M_WEIGHTED_METHODS_INHERIT     = 'wmci',
           M_WEIGHTED_METHODS_NON_PRIVATE = 'wmcnp',
+          M_NUMBER_OF_PUBLIC_METHODS     = 'nopm',
           M_BASE_CLASS_OVERRIDING_RATIO  = 'bovr',
           M_BASE_CLASS_USAGE_RATIO       = 'bur',
           M_PNAS                         = 'pnas',
-          M_NUMBER_OF_NEW_SERVICES       = 'nnas';
+          M_NUMBER_OF_NEW_SERVICES       = 'nnas',
+          M_NUMBER_OF_PROTECTED_MEMBERS  = 'nprotm';
 
 
     /**
@@ -117,6 +119,22 @@ class PHP_Depend_Metrics_ClassLevel_Analyzer
      * @var array(string=>array) $_nodeMetrics
      */
     private $_nodeMetrics = null;
+
+    /**
+     * count of used protected members from the base class for each class
+     *
+     * <code>
+     * array(
+     *     '0375e305-885a-4e91-8b5c-e25bda005438'  => 20
+     * )
+     * </code>
+     *
+     * @var array(string=>array)
+     */
+    private $_baseClassUsageCount = null;
+
+    private $_publicMethods = array();
+    private $_nons = array();
 
     /**
      * The internal used cyclomatic complexity analyzer.
@@ -232,6 +250,19 @@ class PHP_Depend_Metrics_ClassLevel_Analyzer
     {
         $this->fireStartClass($class);
 
+        // make sure that all parent classes are analyzed first
+        $parentClass = $class->getParentClass();
+        if (null !== $parentClass) {
+            $parentClass->accept($this);
+        }
+
+        // initialize the count of used protected members from the base class
+        $this->_baseClassUsageCount[$class->getUUID()] = 0;
+        // initialize public method count forthis class
+        $this->_publicMethods[$class->getUUID()] = array();
+        // initialize count of new services for
+        $this->_nons[$class->getUUID()] = 0;
+
         $this->_nodeMetrics[$class->getUUID()] = array(
             self::M_IMPLEMENTED_INTERFACES       => $class->getInterfaces()->count(),
             self::M_CLASS_INTERFACE_SIZE         => 0,
@@ -239,17 +270,35 @@ class PHP_Depend_Metrics_ClassLevel_Analyzer
             self::M_PROPERTIES                   => 0,
             self::M_PROPERTIES_INHERIT           => $this->_calculateVARSi($class),
             self::M_PROPERTIES_NON_PRIVATE       => 0,
+            self::M_NUMBER_OF_PROTECTED_MEMBERS  => 0,
+            self::M_NUMBER_OF_PUBLIC_METHODS     => 0,
             self::M_WEIGHTED_METHODS             => 0,
             self::M_WEIGHTED_METHODS_INHERIT     => $this->_calculateWMCi($class),
             self::M_WEIGHTED_METHODS_NON_PRIVATE => 0,
             self::M_BASE_CLASS_OVERRIDING_RATIO  => $this->_calculateBOvR($class),
+            self::M_BASE_CLASS_USAGE_RATIO       => 0,
+            self::M_PNAS                         => 0
         );
 
         foreach ($class->getProperties() as $property) {
             $property->accept($this);
         }
+
+
         foreach ($class->getMethods() as $method) {
             $method->accept($this);
+        }
+
+        // update base class usage ratio
+        $nprotm = null === $parentClass ? 0 : $this->_nodeMetrics[$parentClass->getUUID()][self::M_NUMBER_OF_PROTECTED_MEMBERS];
+        $usageRatio = 0 < $nprotm ? $this->_baseClassUsageCount[$class->getUUID()] / $nprotm : 0;
+        $this->_nodeMetrics[$class->getUUID()][self::M_BASE_CLASS_USAGE_RATIO] = $usageRatio;
+
+        if(null !== $parentClass) {
+            // calculate percentage of newly added services
+            $nopm = $this->_nodeMetrics[$class->getUUID()][self::M_NUMBER_OF_PUBLIC_METHODS];
+            $nopm += $this->_nodeMetrics[$parentClass->getUUID()][self::M_NUMBER_OF_PUBLIC_METHODS];
+            $this->_nodeMetrics[$class->getUUID()][self::M_PNAS] = $this->_nons[$class->getUUID()] / $nopm;
         }
 
         $this->fireEndClass($class);
@@ -282,6 +331,7 @@ class PHP_Depend_Metrics_ClassLevel_Analyzer
 
         // Get parent class uuid
         $uuid = $method->getParent()->getUUID();
+        $parentClassUuid = $method->getParent() && $method->getParent()->getParentClass() ? $method->getParent()->getParentClass()->getUUID() : null;
 
         $ccn = $this->_cyclomaticAnalyzer->getCCN2($method);
 
@@ -290,12 +340,23 @@ class PHP_Depend_Metrics_ClassLevel_Analyzer
         // Increment Class Size(CSZ) value
         $this->_nodeMetrics[$uuid][self::M_CLASS_SIZE] += $ccn;
 
+        if ($method->isProtected()) {
+            ++$this->_nodeMetrics[$uuid][self::M_NUMBER_OF_PROTECTED_MEMBERS];
+        }
+
         // Increment Non Private values
         if ($method->isPublic()) {
             // Increment Non Private WMC value
             $this->_nodeMetrics[$uuid][self::M_WEIGHTED_METHODS_NON_PRIVATE] += $ccn;
             // Increment Class Interface Size(CIS) value
             $this->_nodeMetrics[$uuid][self::M_CLASS_INTERFACE_SIZE] += $ccn;
+            //
+            ++$this->_nodeMetrics[$uuid][self::M_NUMBER_OF_PUBLIC_METHODS];
+            $this->_publicMethods[$uuid][$method->getName()] = $method->getName();
+
+            if($parentClassUuid && 0 < count($this->_publicMethods[$parentClassUuid]) && !array_key_exists($method->getName(), $this->_publicMethods[$parentClassUuid])) {
+                ++$this->_nons[$uuid];
+            }
         }
 
         $this->fireEndMethod($method);
@@ -321,6 +382,9 @@ class PHP_Depend_Metrics_ClassLevel_Analyzer
         // Increment Class Size(CSZ) value
         ++$this->_nodeMetrics[$uuid][self::M_CLASS_SIZE];
 
+        if ($property->isProtected()) {
+            ++$this->_nodeMetrics[$uuid][self::M_NUMBER_OF_PROTECTED_MEMBERS];
+        }
         // Increment Non Private values
         if ($property->isPublic()) {
             // Increment Non Private VARS value
@@ -401,7 +465,8 @@ class PHP_Depend_Metrics_ClassLevel_Analyzer
 
     /**
      * Calculates the Base Class Overriding Ratio metric, which is the number of
-     * methods that override methods of the parent class devided by the total number of methods in the calss
+     * methods that override methods of the parent class devided by the total number of
+     * methods in the calss
      * [0..1]
      *
      * @param PHP_Depend_Code_Class $class The context class instance.
@@ -414,28 +479,81 @@ class PHP_Depend_Metrics_ClassLevel_Analyzer
         $overriddenMethods = array();
 
         foreach ($class->getMethods() as $m) {
-            if (!$m->isAbstract() && !$m->isStatic() && '__construct' !== $m->getName() && $class->getName() !== $m->getName())
-            {
+            if (!$m->isAbstract() && !$m->isStatic() && '__construct' !== $m->getName() && $class->getName() !== $m->getName()) {
                 $classMethods[$m->getName()] = $m->getName();
             }
         }
 
-        if (0 < count($classMethods))
-        {
+        if (0 < count($classMethods)) {
             $parent = $class->getParentClass();
-            while ($parent !== null) {
-                // Count all methods
-                foreach ($parent->getMethods() as $m) {
-                    if(isset($classMethods[$m->getName()]) && !$m->isAbstract() && !$m->isStatic() && '__construct' !== $m->getName() && $parent->getName() !== $m->getName()) {
-                        $overriddenMethods[$m->getName()] = $m->getName();
+            if (null !== $parent)
+			      {
+    		        $numberOfBaseClasseMethods = 0;
+                foreach ($parent->getMethods() as $m)
+				        {
+					          if(!$m->isAbstract() && !$m->isStatic() && '__construct' !== $m->getName() && $parent->getName() !== $m->getName())
+					          {
+                        ++$numberOfBaseClasseMethods;
+						            if (isset($classMethods[$m->getName()]))
+						            {
+  					                $overriddenMethods[$m->getName()] = $m->getName();
+						            }
                     }
                 }
-                // Fetch parent class
-                $parent = $parent->getParentClass();
             }
-            var_dump($classMethods);
-            var_dump($overriddenMethods);
         }
-        return count($classMethods) > 0 ? count($overriddenMethods) / count($classMethods) : 0;
+
+        return count($classMethods) > 0 && $numberOfBaseClasseMethods > 0 ? count($overriddenMethods) / $numberOfBaseClasseMethods : 0;
+    }
+
+    /**
+     * Counts the used and usable members of the parent class for the given method
+     *
+     * @param PHP_Depend_Code_Class $class The context class instance.
+     *
+     * @return integer
+     */
+    private function _countBaseClassUsage(PHP_Depend_Code_Method $method)
+    {
+        // get declaring class
+        $class = $method->getParent();
+
+        // do not measure interfaces
+        if($class instanceof PHP_Depend_Code_Class) {
+            $parentClass = $class->getParentClass();
+
+            if(null !== $parentClass) {
+                // collect all accessed properties an methods
+                $accessedProperties = array();
+                $accessedMethods = array();
+                foreach ($method->findChildrenOfType(PHP_Depend_Code_ASTSelfReference::CLAZZ) as $reference) {
+                    $varParent = $reference->getParent();
+                    if(!is_null($varParent)) {
+                        foreach($varParent->findChildrenOfType(PHP_Depend_Code_ASTPropertyPostfix::CLAZZ) as $directAccessor) {
+                           $accessedProperties[$directAccessor->getImage()] = $directAccessor->getImage();
+                        }
+                        foreach($varParent->findChildrenOfType(PHP_Depend_Code_ASTMethodPostfix::CLAZZ) as $directAccessor) {
+                            $accessedMethods[$directAccessor->getImage()] = $directAccessor->getImage();
+                        }
+                    }
+                }
+
+                // Count all methods
+                foreach ($parentClass->getMethods() as $m) {
+                    if($m->isProtectd()) {
+                        if(isset($accessedMethods[$m->getName()])) {
+                            ++$this->_baseClassUsageCount[$class->getUUID()];
+                        }
+                    }
+                }
+                foreach ($parentClass->getProperties() as $p) {
+                    if($p->isProtectd()) {
+                        if(isset($accessedProperties[$p->getName()])) {
+                             ++$this->_baseClassUsageCount[$class->getUUID()];
+                        }
+                    }
+                }
+            }
+        }
     }
 }
