@@ -547,16 +547,46 @@ class PHP_Depend_Metrics_ClassLevel_AnalyzerTest extends PHP_Depend_Metrics_Abst
         $this->assertEquals(0.5, $this->_calculateMetric(__METHOD__, 'bovr'));
     }
 
+    /**
+     * Tests that the analyzer calculates the correct PNAS metric.
+     *
+     * @return void
+     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+     * @group pdepend
+     * @group pdepend::metrics
+     * @group pdepend::metrics::classlevel
+     * @group unittest
+     */
     public function testCalculatePnasMetricForNoNewServices()
     {
         $this->assertEquals(0, $this->_calculateMetric(__METHOD__, 'pnas'));
     }
 
+    /**
+     * Tests that the analyzer calculates the correct PNAS metric.
+     *
+     * @return void
+     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+     * @group pdepend
+     * @group pdepend::metrics
+     * @group pdepend::metrics::classlevel
+     * @group unittest
+     */
     public function testCalculatePnasMetricFor50PNewServices()
     {
         $this->assertEquals(0.5, $this->_calculateMetric(__METHOD__, 'pnas'));
     }
 
+    /**
+     * Tests that the analyzer calculates the correct PNAS metric.
+     *
+     * @return void
+     * @covers PHP_Depend_Metrics_ClassLevel_Analyzer
+     * @group pdepend
+     * @group pdepend::metrics
+     * @group pdepend::metrics::classlevel
+     * @group unittest
+     */
     public function testCalculatePnasMetricFor100PNewServices()
     {
         $this->assertEquals(1, $this->_calculateMetric(__METHOD__, 'pnas'));

@@ -133,8 +133,6 @@ class PHP_Depend_Metrics_ClassLevel_Analyzer
      */
     private $_baseClassUsageCount = null;
 
-    private $_publicMethods = array();
-
     /**
      * The internal used cyclomatic complexity analyzer.
      *
@@ -257,10 +255,6 @@ class PHP_Depend_Metrics_ClassLevel_Analyzer
 
         // initialize the count of used protected members from the base class
         $this->_baseClassUsageCount[$class->getUUID()] = 0;
-        // initialize public method count forthis class
-        $this->_publicMethods[$class->getUUID()] = array();
-        // initialize count of new services for
-        $this->_nons[$class->getUUID()] = 0;
 
         $this->_nodeMetrics[$class->getUUID()] = array(
             self::M_IMPLEMENTED_INTERFACES       => $class->getInterfaces()->count(),
@@ -342,9 +336,6 @@ class PHP_Depend_Metrics_ClassLevel_Analyzer
             $this->_nodeMetrics[$uuid][self::M_WEIGHTED_METHODS_NON_PRIVATE] += $ccn;
             // Increment Class Interface Size(CIS) value
             $this->_nodeMetrics[$uuid][self::M_CLASS_INTERFACE_SIZE] += $ccn;
-            //
-            ++$this->_nodeMetrics[$uuid][self::M_NUMBER_OF_PUBLIC_METHODS];
-            $this->_publicMethods[$uuid][$method->getName()] = $method->getName();
         }
 
         $this->fireEndMethod($method);
