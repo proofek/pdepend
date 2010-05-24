@@ -13,7 +13,10 @@ class B extends A
 
 class A
 {
-    abstract public function a();
+    public function a()
+    {
+
+    }
 
     public function b()
     {

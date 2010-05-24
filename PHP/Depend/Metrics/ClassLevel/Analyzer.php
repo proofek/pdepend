@@ -134,7 +134,6 @@ class PHP_Depend_Metrics_ClassLevel_Analyzer
     private $_baseClassUsageCount = null;
 
     private $_publicMethods = array();
-    private $_nons = array();
 
     /**
      * The internal used cyclomatic complexity analyzer.
@@ -277,7 +276,7 @@ class PHP_Depend_Metrics_ClassLevel_Analyzer
             self::M_WEIGHTED_METHODS_NON_PRIVATE => 0,
             self::M_BASE_CLASS_OVERRIDING_RATIO  => $this->_calculateBOvR($class),
             self::M_BASE_CLASS_USAGE_RATIO       => 0,
-            self::M_PNAS                         => 0
+            self::M_PNAS                         => $this->_calculatePnas($class)
         );
 
         foreach ($class->getProperties() as $property) {
@@ -293,13 +292,6 @@ class PHP_Depend_Metrics_ClassLevel_Analyzer
         $nprotm = null === $parentClass ? 0 : $this->_nodeMetrics[$parentClass->getUUID()][self::M_NUMBER_OF_PROTECTED_MEMBERS];
         $usageRatio = 0 < $nprotm ? $this->_baseClassUsageCount[$class->getUUID()] / $nprotm : 0;
         $this->_nodeMetrics[$class->getUUID()][self::M_BASE_CLASS_USAGE_RATIO] = $usageRatio;
-
-        if(null !== $parentClass) {
-            // calculate percentage of newly added services
-            $nopm = $this->_nodeMetrics[$class->getUUID()][self::M_NUMBER_OF_PUBLIC_METHODS];
-            $nopm += $this->_nodeMetrics[$parentClass->getUUID()][self::M_NUMBER_OF_PUBLIC_METHODS];
-            $this->_nodeMetrics[$class->getUUID()][self::M_PNAS] = $this->_nons[$class->getUUID()] / $nopm;
-        }
 
         $this->fireEndClass($class);
     }
@@ -353,10 +345,6 @@ class PHP_Depend_Metrics_ClassLevel_Analyzer
             //
             ++$this->_nodeMetrics[$uuid][self::M_NUMBER_OF_PUBLIC_METHODS];
             $this->_publicMethods[$uuid][$method->getName()] = $method->getName();
-
-            if($parentClassUuid && 0 < count($this->_publicMethods[$parentClassUuid]) && !array_key_exists($method->getName(), $this->_publicMethods[$parentClassUuid])) {
-                ++$this->_nons[$uuid];
-            }
         }
 
         $this->fireEndMethod($method);
@@ -476,8 +464,6 @@ class PHP_Depend_Metrics_ClassLevel_Analyzer
     private function _calculateBOvR(PHP_Depend_Code_Class $class)
     {
         $classMethods = array();
-        $overriddenMethods = array();
-
         foreach ($class->getMethods() as $m) {
             if (!$m->isAbstract() && !$m->isStatic() && '__construct' !== $m->getName() && $class->getName() !== $m->getName()) {
                 $classMethods[$m->getName()] = $m->getName();
@@ -488,22 +474,54 @@ class PHP_Depend_Metrics_ClassLevel_Analyzer
             $parent = $class->getParentClass();
             if (null !== $parent)
 			      {
-    		        $numberOfBaseClasseMethods = 0;
+    		        $numOfBaseClassMethods = 0;
+    		        $numOfOverriddenMethods = 0;
                 foreach ($parent->getMethods() as $m)
 				        {
 					          if(!$m->isAbstract() && !$m->isStatic() && '__construct' !== $m->getName() && $parent->getName() !== $m->getName())
 					          {
-                        ++$numberOfBaseClasseMethods;
+                        ++$numOfBaseClassMethods;
 						            if (isset($classMethods[$m->getName()]))
 						            {
-  					                $overriddenMethods[$m->getName()] = $m->getName();
+  					                ++$numOfOverriddenMethods;
 						            }
                     }
+                }
+
+                if (0 < $numOfBaseClassMethods && 0 < $numOfOverriddenMethods) {
+                    return $numOfOverriddenMethods / $numOfBaseClassMethods;
                 }
             }
         }
 
-        return count($classMethods) > 0 && $numberOfBaseClasseMethods > 0 ? count($overriddenMethods) / $numberOfBaseClasseMethods : 0;
+        return 0;
+    }
+
+    private function _calculatePnas(PHP_Depend_Code_Class $class)
+    {
+        $parent = $class->getParentClass();
+        if (null !== $parent) {
+            $parentClassMethods = array();
+            foreach ($parent->getMethods() as $m) {
+                if(!$m->isStatic() && '__construct' !== $m->getName() && $parent->getName() !== $m->getName()) {
+                    $parentClassMethods[$m->getName()] = $m->getName();
+                }
+            }
+        }
+
+        $numServices = count($parentClassMethods);
+        $numNewServices = 0;
+        foreach ($class->getMethods() as $m) {
+            if (!$m->isStatic() && '__construct' !== $m->getName() && $class->getName() !== $m->getName()) {
+                if (!isset($parentClassMethods[$m->getName()]))
+                {
+                    ++$numServices;
+                    ++$numNewServices;
+                }
+            }
+        }
+
+        return 0 < $numServices ? $numNewServices / $numServices : 0;
     }
 
     /**

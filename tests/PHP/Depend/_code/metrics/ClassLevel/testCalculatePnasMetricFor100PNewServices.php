@@ -6,16 +6,16 @@ class B extends A
 
     }
 
-    public function b()
+    public function c()
+    {
+
+    }
+
+    public function d()
     {
     }
 }
 
 class A
 {
-    abstract public function a();
-
-    public function b()
-    {
-    }
 }

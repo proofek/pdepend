@@ -1,19 +1,18 @@
 <?php
 class B extends A
 {
-    public function a()
+    public function g()
     {
-
     }
-
-    public function b()
+    public function h()
     {
     }
 }
-
 class A
 {
-    abstract public function a();
+    public function a()
+    {
+    }
 
     public function b()
     {
